@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+            <title>Scikit Learn Classifier Tester</title>
+
+            <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+
+        <div class="classification__container">
+
+            <div class="classification-input">
+
+                <div class="training-data">
+                    <div class="classification-input__text">Training data: </div>
+                    <input type="file" id="train-file" />
+                </div>
+
+                <div class="label-column-name">
+                    <div class="classification-input__text">Label column name: </div>
+                    <input type="text" id="train-input__label-column-name" />
+                </div>
+
+                <div class="classification-choices">
+
+                    <div class="classifier-choice">
+                        <div class="classification-input__text">LinearSVC</div>
+                        <input type="checkbox" class="classifier-selection" id="LINEAR_SVC"/>
+                    </div>
+
+                    <div class="classifier-choice">
+                        <div class="classification-input__text">GaussianNB</div>
+                        <input type="checkbox" class="classifier-selection" id="GAUSSIAN_NB"/>
+                    </div>
+
+                    <div class="classifier-choice">
+                        <div class="classification-input__text">RidgeClassifier</div>
+                        <input type="checkbox" class="classifier-selection" id="RIDGE_CLASSIFIER"/>
+                    </div>
+
+                    <div class="classifier-choice">
+                        <div class="classification-input__text">LogisticRegression</div>
+                        <input type="checkbox" class="classifier-selection" id="LOGISTIC_REGRESSION"/>
+                    </div>
+
+                    <div class="classifier-choice">
+                        <div class="classification-input__text">DecisionTreeClassifier</div>
+                        <input type="checkbox" class="classifier-selection" id="DECISION_TREE_CLASSIFIER"/>
+                    </div>
+
+                    <div class="classifier-choice">
+                        <div class="classification-input__text">RandomForestClassifier</div>
+                        <input type="checkbox" class="classifier-selection" id="RANDOM_FOREST_CLASSIFIER"/>
+                    </div>
+
+                    <div class="classifier-choice">
+                        <div class="classification-input__text">GradientBoostingClassifier</div>
+                        <input type="checkbox" class="classifier-selection" id="GRADIENT_BOOSTING_CLASSIFIER"/>
+                    </div>
+
+                    <div class="classifier-choice">
+                        <div class="classification-input__text">LinearDiscriminantAnalysis</div>
+                        <input type="checkbox" class="classifier-selection" id="LINEAR_DISCRIMINANT_ANALYSIS"/>
+                    </div>
+
+                    <div class="classifier-choice">
+                        <div class="classification-input__text">QuadraticDiscriminantAnalysis</div>
+                        <input type="checkbox" class="classifier-selection" id="QUADRATIC_DISCRIMINANT_ANALYSIS"/>
+                    </div>
+
+                </div>
+
+
+                <div class="classification-choices">
+
+                    <div class="scaler-choice">
+                        <div class="classification-input__text">StandardScaler</div>
+                        <input type="checkbox" class="scaler-selection" id="STANDARD_SCALER"/>
+                    </div>
+
+                    <div class="scaler-choice">
+                        <div class="classification-input__text">MinMaxScaler</div>
+                        <input type="checkbox" class="scaler-selection" id="MIN_MAX_SCALER"/>
+                    </div>
+
+                    <div class="scaler-choice">
+                        <div class="classification-input__text">RobustScaler</div>
+                        <input type="checkbox" class="scaler-selection" id="ROBUST_SCALER"/>
+                    </div>
+
+                    <div class="scaler-choice">
+                        <div class="classification-input__text">MaxAbsScaler</div>
+                        <input type="checkbox" class="scaler-selection" id="MAX_ABS_SCALER"/>
+                    </div>
+
+                </div>
+
+                <button onclick="run_classification()">Run Classification</button>
+
+            </div>
+
+            <div id="classification-result"></div>
+
+        </div>
+
+        <script>
+
+            function run_classification() {
+                $('#classification-result').text('Running Job...');
+
+                var training_input = $("#train-file")[0];
+                var training_file = training_input.files[0];
+                var formData = new FormData();
+
+                var classifiers_selected = [];
+                var classifiers_checked = $("input.classifier-selection");
+                for (var i = 0; i < classifiers_checked.length; i++) {
+                    if ($(classifiers_checked[i]).prop("checked")) {
+                        classifiers_selected.push(classifiers_checked[i].id);
+                    }
+                }
+                classifiers_selected = JSON.stringify(classifiers_selected);
+
+                var scalers_selected = [];
+                var scalers_checked = $("input.scaler-selection");
+                for (var i = 0; i < scalers_checked.length; i++) {
+                    if ($(scalers_checked[i]).prop("checked")) {
+                        scalers_selected.push(scalers_checked[i].id);
+                    }
+                }
+                scalers_selected = JSON.stringify(scalers_selected);
+
+
+                train_label_column_name = $('#train-input__label-column-name').val();
+                formData.append('training_file', training_file);
+                formData.append('classifiers_selected', classifiers_selected);
+                formData.append('scalers_selected', scalers_selected);
+                formData.append('train_label_column_name', train_label_column_name);
+
+
+                var xhr = new XMLHttpRequest();
+
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState == XMLHttpRequest.DONE) {
+
+                        if (xhr.status === 200) {
+                            var json = JSON.parse(xhr.responseText);
+
+                            var $compiled = $('#results--template').tmpl({
+                                results: json
+                            });
+                            $('#classification-result').empty().append($compiled);
+                        } else {
+                            $('#classification-result').empty().append(xhr.statusText);
+                            console.error(xhr.statusText);
+                        }
+
+                    }
+                };
+
+                xhr.open('POST', '/classify', true);
+                xhr.send(formData);
+            }
+
+        </script>
+
+
+        <script id="results--template" type="text/x-jquery-tmpl">
+            {{each(i, result) results}}
+
+                <div class='result-item'>${i + 1}. ${result['classifier']}:</div>
+                    <div class='summary-item__detail'>Scaler: ${result['scaler']}</div>
+
+                    <div class='summary-item__detail'>CV Scores: ${result['cv_scores']}}</div>
+
+                    <div class='summary-item__detail'>Test Score: ${result['score']}</div>
+                </div>
+
+            {{/each}}
+        </script>
+
+        <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+        <script src="https://ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.js"></script>
+
+    </body>
+
+</html>

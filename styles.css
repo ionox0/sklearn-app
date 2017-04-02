@@ -1,0 +1,24 @@
+.classification__container {
+    display: flex;
+    flex-direction: row;
+}
+
+.classification-input {
+
+}
+
+.classification-choices {
+    margin: 20px auto;
+}
+
+.classifier-choice {
+
+}
+
+.classification-input__text {
+    display: inline-block;
+}
+
+.classification-result {
+
+}

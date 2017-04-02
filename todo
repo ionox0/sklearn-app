@@ -1,0 +1,15 @@
+- params
+    - classifiers
+    - scalers
+    - imputers
+    - poly features
+    - feature selectors
+
+- optional
+    - dummies
+    - scalers
+    - imputers
+    - polynomial features
+    - feature selectors
+
+- predict with best model
