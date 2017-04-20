@@ -1,6 +1,7 @@
 # sklearn-app
 Simple frontend for sklearn classifiers
 
+![](./sklearn-app.png)
 
 # Usage:
 1. Clone the repo
