@@ -27,18 +27,34 @@ def classify_route():
     src = os.getcwd() + '/uploaded_data/'
     train_csv.save(os.path.join(src, train_csv.filename))
 
+    job_settings = parse_classification_job_settings(request)
+    print(job_settings)
+
+    results = do_classifications(train_data_file=train_csv.filename, **job_settings)
+
+    return json.dumps(results)
+
+
+def parse_classification_job_settings(request):
+
     train_label_column_name = request.form['train_label_column_name']
     classifiers_selected = json.loads(request.form['classifiers_selected'])
     scalers_selected = json.loads(request.form['scalers_selected'])
 
-    print(classifiers_selected, scalers_selected, train_label_column_name)
+    polynomial_features = strtobool(request.form['polynomial_features'])
+    polynomial_features_degree = int(request.form['polynomial_features_degree'])
+    polynomial_features_interaction_only = strtobool(request.form['polynomial_features_interaction_only'])
 
-    results = do_classifications(train_data_file=train_csv.filename,
-                                 label_column_name=train_label_column_name,
-                                 classifiers=classifiers_selected,
-                                 scalers=scalers_selected)
+    settings = {
+        'label_column_name': train_label_column_name,
+        'classifiers': classifiers_selected,
+        'scalers': scalers_selected,
+        'polynomial_features': polynomial_features,
+        'polynomial_features_degree': polynomial_features_degree,
+        'polynomial_features_interaction_only': polynomial_features_interaction_only,
+    }
 
-    return json.dumps(results)
+    return settings
 
 
 if __name__ == '__main__':

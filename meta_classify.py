@@ -132,7 +132,7 @@ CLASSIFIERS = {
 }
 
 
-def do_data_transform_pipeline(scal, x_train, x_test):
+def do_data_transform_pipeline(scal, poly, x_train, x_test):
     train_continuous = x_train.select_dtypes(include=['float64', 'int64'])
     train_categorical = x_train.select_dtypes(include=['object'])
 
@@ -147,8 +147,8 @@ def do_data_transform_pipeline(scal, x_train, x_test):
     x_test = do_dummies(x_test, categorical_cols)
 
     # Polynomial Features
-    x_train = do_polys(POLYNOMIAL_FEATURES[0], x_train)
-    x_test = do_polys(POLYNOMIAL_FEATURES[0], x_test)
+    x_train = do_polys(poly, x_train)
+    x_test = do_polys(poly, x_test)
 
     # Scaling
     x_train, x_test = do_scaling(scal, x_train, x_test)
@@ -167,7 +167,8 @@ def do_classifications(
         train_data_file,
         label_column_name,
         scalers,
-        classifiers):
+        classifiers,
+        polynomial_transformers):
 
     train_data = pd.read_csv('uploaded_data/' + train_data_file, na_values=["unknown"])
 
@@ -176,9 +177,9 @@ def do_classifications(
 
     train_results = []
 
-    combs = itertools.product(scalers, classifiers)
+    combs = itertools.product(scalers, polynomial_transformers, classifiers)
 
-    for scal_string, clf_string in combs:
+    for scal_string, poly_string, clf_string in combs:
         print(delim)
 
         clf = CLASSIFIERS[clf_string]()
@@ -194,7 +195,7 @@ def do_classifications(
         x_train, x_test, y_train, y_test = train_test_split(train_data, train_labels, stratify=train_labels, random_state=42)
 
         # Transform data
-        x_train, x_test = do_data_transform_pipeline(scal, x_train, x_test)
+        x_train, x_test = do_data_transform_pipeline(scal, poly, x_train, x_test)
 
         # Fit and score model
         cv_scores, score = do_cross_val_and_score(clf, x_train, x_test, y_train, y_test)

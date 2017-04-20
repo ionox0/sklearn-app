@@ -96,6 +96,19 @@
 
                 </div>
 
+                <div class="classification-choices">
+
+                    <div class="polynomial-choice">
+                        <div class="classification-input__text">PolynomialFeatures</div>
+                        <input type="checkbox" id="polynomial-features-selectied" id="POLYNOMIAL_FEATURES"/>
+                        <div class="classification-input__text">Degree</div>
+                        <input type="checkbox" id="polynomial-features-degree" id="POLYNOMIAL_DEGREE"/>
+                        <div class="classification-input__text">Interaction Only</div>
+                        <input type="checkbox" id="polynomial-features-int-only" id="POLYNOMIAL_INTERACTION_ONLY"/>
+                    </div>
+
+                </div>
+
                 <button onclick="run_classification()">Run Classification</button>
 
             </div>
@@ -113,6 +126,7 @@
                 var training_file = training_input.files[0];
                 var formData = new FormData();
 
+                // Classifiers
                 var classifiers_selected = [];
                 var classifiers_checked = $("input.classifier-selection");
                 for (var i = 0; i < classifiers_checked.length; i++) {
@@ -122,6 +136,7 @@
                 }
                 classifiers_selected = JSON.stringify(classifiers_selected);
 
+                // Scaling
                 var scalers_selected = [];
                 var scalers_checked = $("input.scaler-selection");
                 for (var i = 0; i < scalers_checked.length; i++) {
@@ -131,12 +146,20 @@
                 }
                 scalers_selected = JSON.stringify(scalers_selected);
 
+                // Polynomial Features
+                var polynomial_features_selected = $('#polynomial-features-selected').prop('checked');
+                var polynomial_features_degree = $('#polynomial-features-degree').prop('checked');
+                var polynomial_features_interaction_only = $('#polynomial-features-int-only').prop('checked');
+
 
                 train_label_column_name = $('#train-input__label-column-name').val();
                 formData.append('training_file', training_file);
                 formData.append('classifiers_selected', classifiers_selected);
                 formData.append('scalers_selected', scalers_selected);
                 formData.append('train_label_column_name', train_label_column_name);
+                formData.append('polynomial_features', polynomial_features_selected);
+                formData.append('polynomial_features_degree', polynomial_features_degree);
+                formData.append('polynomial_features_interaction_only', polynomial_features_interaction_only);
 
 
                 var xhr = new XMLHttpRequest();
